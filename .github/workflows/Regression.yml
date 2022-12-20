@@ -8,14 +8,9 @@ on:
         required: true
         type: choice
         options:
-        - DonationsRegressionTestSuite
-        - MembershipRegressionTestSuite
-        - RefundRegressionTests
-        - USOrgMemberAndNonMemberChurchTestSuite
-        - USOrgTaxExemptAndNonTaxExemptTestSuite
-        - CanadaBUTestSuite
-        - TestMultiStockableOnPipeline
-        - AllMultistockableProductOrderTestSuite
+        - Test1Suite
+        - Test2Suite
+
 
 jobs:
   RunTests:
@@ -38,12 +33,12 @@ jobs:
          maven-version: 3.8.2
          
       - name: Started ${{github.event.inputs.Module}} Execution
-        working-directory: ./awana-sf-testing
+        working-directory: ./WORKSPACELOCATION
         run: mvn clean -DSuiteName=@${{github.event.inputs.Module}} verify
      
       - name: Generate Execution ${{github.event.inputs.Module}} Report
         if : ${{always()}}
-        working-directory: ./awana-sf-testing
+        working-directory: ./WORKSPACELOCATION
         run: mvn serenity::aggregate
        
       - name: Upload Execution Report
@@ -51,4 +46,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{github.event.inputs.Module}}-Execution-Report
-          path: D:/a/SF_QA_Src/SF_QA_Src/awana-sf-testing/target
+          path: D:/REPORTLOCATION/target
