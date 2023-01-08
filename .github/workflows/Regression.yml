@@ -4,23 +4,31 @@ on:
    inputs:
       Module:
         description: Select a module for execution
-        default: ''
+        default: 'Test1Suite'
         required: true
         type: choice
         options:
         - Test1Suite
         - Test2Suite
-
+        - Test3Suite
+      Exe_Environment:
+        description: Select a Environment for execution
+        default: 'DEV'
+        required: true
+        type: choice
+        options:
+        - QA
+        - Dev
+        - Prod
 
 jobs:
   RunTests:
-    runs-on: windows-latest
-   
+    runs-on: windows-latest   
     steps:
       - uses: browser-actions/setup-chrome@latest
       - run: chrome --version
       - uses: actions/checkout@v2
-     
+   
       - name: Set up Java 11
         uses: actions/setup-java@v3
         with:
@@ -35,12 +43,7 @@ jobs:
       - name: Started ${{github.event.inputs.Module}} Execution
         working-directory: ./WORKSPACELOCATION
         run: mvn clean -DSuiteName=@${{github.event.inputs.Module}} verify
-     
-      - name: Generate Execution ${{github.event.inputs.Module}} Report
-        if : ${{always()}}
-        working-directory: ./WORKSPACELOCATION
-        run: mvn serenity::aggregate
-       
+            
       - name: Upload Execution Report
         if : ${{always()}}
         uses: actions/upload-artifact@v3
