@@ -1,0 +1,111 @@
+package script;
+
+import java.io.IOException;
+
+import org.joox.selector.CSS2XPath;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.testng.annotations.Test;
+
+import base.BaseTest;
+import framework.selfheal.discovery.controllers.WebController;
+
+public class UsingJSOUP extends BaseTest {
+	WebDriver driver;
+
+	public static void main(String[] args) {
+
+		try {
+			Document doc = Jsoup.connect("https://").get();
+			Elements elements = doc.select("*");
+			for (Element element : elements) {
+				if(!element.tagName().equalsIgnoreCase("script")&& !element.tagName().equalsIgnoreCase("noscript")
+						&& !element.tagName().equalsIgnoreCase("app-root")) {
+				String path = CSS2XPath.css2xpath(element.cssSelector(), true);
+				System.out.println("Node name : " + element.nodeName());
+				System.out.println("      Tag : " + element.tagName());
+				System.out.println("      CSS : " + element.dataset());
+				System.out.println("    XPath : " + path + "\n");
+				System.out.println("      root : " + element.root());
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void jsoupDemoTest() {
+		driver = WebController.getInstance().getDriver();
+		driver.get("https://dev.events.awana.org/");
+		wait(5000);
+		getTextLocator("QE_Automation_Testing_Coupons");
+		getButtonLocator("Apply");
+	}
+
+	public String getTextLocator(String text) {
+		String finalLocator = null;
+		final String HTML_SOURCE_CODE = driver.getPageSource();
+		Document document = Jsoup.parse(HTML_SOURCE_CODE);
+		for (Element locator : document.body()
+				.getElementsContainingText(text)) {
+			if (locator.text().equalsIgnoreCase(text)) {
+				String nodeName = locator.nodeName();
+				Attributes attibutes = locator.attributes();
+				if (isElementDisplayed("//" + nodeName + "[@class='"
+						+ attibutes.get("class") + "']")) {
+					finalLocator = "//" + nodeName + "[@class='"
+							+ attibutes.get("class") + "' and contains(text(),'"
+							+ text + "')]";
+					System.out
+							.println("This is valid locator: " + finalLocator);
+				}
+			}
+		}
+		return finalLocator;
+	}
+
+	public String getButtonLocator(String buttonName) {
+		String finalLocator = null;
+		final String HTML_SOURCE_CODE = driver.getPageSource();
+		Document document = Jsoup.parse(HTML_SOURCE_CODE);
+		for (Element locator : document.body()
+				.getElementsContainingText(buttonName)) {
+			if (locator.text().equalsIgnoreCase(buttonName)) {
+				String nodeName = locator.nodeName();
+				Attributes attibutes = locator.attributes();
+				if (isElementDisplayed("//" + nodeName + "[@class='"
+						+ attibutes.get("class") + "']")) {
+					finalLocator = "//" + nodeName + "[@class='"
+							+ attibutes.get("class") + "']";
+					System.out
+							.println("This is valid locator: " + finalLocator);
+				}
+			}
+		}
+		return finalLocator;
+	}
+
+	public void wait(int timeout) {
+		try {
+			Thread.sleep(timeout);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean isElementDisplayed(String locator) {
+		try {
+			driver.findElement(By.xpath(locator));
+			return driver.findElement(By.xpath(locator)).isDisplayed();
+		} catch (NoSuchElementException e) {
+			return false;
+		}
+	}
+}
